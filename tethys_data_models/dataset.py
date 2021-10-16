@@ -113,7 +113,7 @@ class Dataset(DatasetBase):
     extent: geometry = Field(None, description='The geographical extent of the datset as a simple rectangular polygon.')
     time_range: TimeRange = Field(None, description='The maximum time range of the dataset.')
     spatial_resolution: float = Field(None, description='The spatial resolution in decimal degrees if the spatial_distribution is grid.')
-    heights: List[int] = Field(None, description='The heights from all available results in the dataset.')
+    heights: Union[List[float], List[int]] = Field(None, description='The heights from all available results in the dataset.')
     cf_standard_name: str = Field(None, description='The CF conventions standard name for the parameter.')
     wrf_standard_name: str = Field(None, description='The WRF standard name for the parameter.')
     precision: float = Field(None, description='The decimal precision of the result values.')
