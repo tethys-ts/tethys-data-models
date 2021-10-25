@@ -77,11 +77,44 @@ class ActivityType(str, Enum):
     discharge_water = 'discharge water'
 
 
+class SdMethod(str, Enum):
+    """
+    The stream depletion method assigned for the permit.
+    """
+    theis_1941 = 'theis_1941'
+    hunt_1999 = 'hunt_1999'
+    hunt_2003 = 'hunt_2003'
+    hunt_2009 = 'hunt_2009'
+    ward_lough_2011 = 'ward_lough_2011'
+
+
+class AquiferProp(BaseModel):
+    """
+
+    """
+    method: Optional[SdMethod]
+    stream_depletion_ratio: Optional[float] = Field(None, description='The stream depletion ratio calculated from the n_days and the method.')
+    n_days: Optional[int] = Field(None, description='The number of pumping days assigned to the permit associated with the stream depletion calculation requirements.')
+    sep_distance : Optional[int] = Field(None, description='The separation distance from the pumped well to the stream.')
+    pump_aq_trans : Optional[int] = Field(None, description='The pumped (confined) aquifer transmissivity (m2/day).')
+    pump_aq_s : Optional[float] = Field(None, description='The storage coefficient of the pumped aquifer.')
+    upper_aq_trans: Optional[int] = Field(None, description='The surficial aquifer transmissivity (m2/day).')
+    upper_aq_s : Optional[float] = Field(None, description='The storage coefficient of the surficial aquifer.')
+    lower_aq_trans: Optional[int] = Field(None, description='The confined aquifer transmissivity (m2/day).')
+    lower_aq_s : Optional[float] = Field(None, description='The storage coefficient (specific storage) of the confined aquifer.')
+    aqt_k : Optional[int] = Field(None, description='The aquitard hydraulic conductivity (m/day).')
+    aqt_s : Optional[float] = Field(None, description='The aquitard storage coefficient.')
+    aqt_thick : Optional[int] = Field(None, description='The aquitard vertical thickness (m).')
+    stream_k : Optional[int] = Field(None, description='Streambed hydraulic conductivity (m/day).')
+    stream_thick : Optional[int] = Field(None, description='The streambed vertical thickness (m).')
+    stream_width : Optional[int] = Field(None, description='The streambed width (m).')
+
+
 class Station(base.Station):
     """
-    Contains the station data of a dataset.
+    Contains the station data.
     """
-    stream_depletion_ratio: Optional[float]
+    properties: AquiferProp
 
 
 class Feature(str, Enum):
@@ -142,33 +175,3 @@ class Permit(BaseModel):
 
 # with open('/media/nvme1/git/nz-rma-permits/nzpermits/tests/permit_schema.json', 'w') as f:
 #     f.write(Permit.schema_json())
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

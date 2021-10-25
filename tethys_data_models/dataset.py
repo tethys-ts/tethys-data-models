@@ -7,7 +7,6 @@ Similar for the dataset_id, except that the first 8 fields (starting with featur
 from datetime import datetime, date
 from typing import List, Optional, Dict, Union
 from pydantic import BaseModel, Field, HttpUrl
-# from hashlib import blake2b
 import orjson
 from .utils import orjson_dumps
 from . import base
@@ -106,7 +105,6 @@ class Dataset(DatasetBase):
     units: str = Field(..., description='The units of the result.')
     license: str = Field(..., description='The legal data license associated with the dataset defined by the owner.')
     attribution: str = Field(..., description='The legally required attribution text to be distributed with the data defined by the owner.')
-    # result_type: str = Field(None, description='The type of result. This is a category to define how the station results can or cannot be handled on the whole. For example, a time_series_grid would indicate that the stations are alligned in a grid.')
     spatial_distribution: str = Field(..., description='This describes how the spatial data are distributed. Either sparse or grid.')
     geometry_type: str = Field(..., description='This describes how the spatial dimensions are stored. Point, Line, Polygon, or Collection. Follows the OGC spatial data types.')
     grouping: str = Field(..., description='This describes how the staions and the associated data are grouped. Either none or blocks.')

@@ -41,57 +41,8 @@ class Station(BaseModel):
     osm_id: int = None
     geometry: geometry
     altitude: float = None
-    # heights: List[int]
     properties: Dict = Field(None, description='Any additional station specific properties.')
 
     class Config:
         json_loads = orjson.loads
         json_dumps = orjson_dumps
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
