@@ -102,10 +102,10 @@ class AquiferProp(BaseModel):
     upper_aq_s : Optional[float] = Field(None, description='The storage coefficient of the surficial aquifer.')
     lower_aq_trans: Optional[int] = Field(None, description='The confined aquifer transmissivity (m2/day).')
     lower_aq_s : Optional[float] = Field(None, description='The storage coefficient (specific storage) of the confined aquifer.')
-    aqt_k : Optional[int] = Field(None, description='The aquitard hydraulic conductivity (m/day).')
+    aqt_k : Optional[float] = Field(None, description='The aquitard hydraulic conductivity (m/day).')
     aqt_s : Optional[float] = Field(None, description='The aquitard storage coefficient.')
     aqt_thick : Optional[int] = Field(None, description='The aquitard vertical thickness (m).')
-    stream_k : Optional[int] = Field(None, description='Streambed hydraulic conductivity (m/day).')
+    stream_k : Optional[float] = Field(None, description='Streambed hydraulic conductivity (m/day).')
     stream_thick : Optional[int] = Field(None, description='The streambed vertical thickness (m).')
     stream_width : Optional[int] = Field(None, description='The streambed width (m).')
 
