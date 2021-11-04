@@ -118,6 +118,7 @@ class Dataset(DatasetBase):
     description: str = Field(None, description='Dataset description.')
     product_description: str = Field(None, description='Overall description of the product if method is simulation.')
     processing_code: int = Field(None, description='The processing code to determine how the input data should be processed.')
+    parent_datasets: List[str] = Field(None, description='The parent datasets that this dataset was derived from.')
     properties: Dict = Field(None, description='Any additional dataset specific properties.')
     modified_date: datetime = Field(None, description='The modification date of the last edit.')
     version: int = Field(None, description='The version of the metadata structure.')
