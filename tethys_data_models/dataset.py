@@ -1,27 +1,77 @@
 """
 Created by Mike Kittridge on 2020-11-02.
 
-For hashing the geometry of stations, use blake2b with a digest_size of 12.
+For hashing the geometry of stations, use blake2b with a digest_size of 12 of the hex encoded WKB.
 Similar for the dataset_id, except that the first 8 fields (starting with feature) should be used for the hashing.
 """
 from datetime import datetime, date
 from typing import List, Optional, Dict, Union
 from pydantic import BaseModel, Field, HttpUrl
 import orjson
-from .utils import orjson_dumps
-from . import base
-from .geometry import geometry
+from enum import Enum
+from tethys_data_models.utils import orjson_dumps
+from tethys_data_models import base
+from tethys_data_models.geometry import geometry
 
 #########################################
 ### Models
 
 
-class ResultsDimensions(BaseModel):
-    lat: int = None
-    lon: int = None
-    geometry: int = None
+class ResultType(str, Enum):
+    time_series = 'time_series'
+    grid = 'grid'
+    trajectory = 'trajectory'
+    time_series_bands = 'time_series_bands'
+    grid_bands = 'grid_bands'
+    trajectory_bands = 'trajectory_bands'
+
+
+class TimeSeriesDims(BaseModel):
+    geometry: int
     height: int
     time: int
+
+
+class GridDims(BaseModel):
+    lat: int
+    lon: int
+    height: int
+    time: int
+
+
+class TrajectoryDims(BaseModel):
+    geometry: int
+
+
+class TimeSeriesBandsDims(BaseModel):
+    geometry: int
+    height: int
+    time: int
+    band: int
+
+
+class GridBandsDims(BaseModel):
+    lat: int
+    lon: int
+    height: int
+    time: int
+    band: int
+
+
+class TrajectoryBandsDims(BaseModel):
+    geometry: int
+    band: int
+
+
+ResultDims = Union[TimeSeriesDims, GridDims, TrajectoryDims, TimeSeriesBandsDims, GridBandsDims, TrajectoryBandsDims]
+
+# class ResultDims(BaseModel):
+#     lat: int = None
+#     lon: int = None
+#     geometry: int = None
+#     height: int
+#     time: int
+#     band: int = None
 
 
 class TimeRange(BaseModel):
@@ -52,6 +102,8 @@ class S3ObjectKey(BaseModel):
     content_length: int
     etag: str = None
     run_date: datetime
+    name: str = None
+    description: str = None
 
 
 class StationBase(base.Station):
@@ -59,7 +111,7 @@ class StationBase(base.Station):
     Contains the base station data.
     """
     dataset_id: str = Field(..., description='The unique dataset uuid.')
-    dimensions: ResultsDimensions
+    dimensions: ResultDims
     heights: Union[List[float], List[int]]
     # heights: List[int]
     time_range: TimeRange = Field(..., description='The maximum time range of the result.')
@@ -105,7 +157,8 @@ class Dataset(DatasetBase):
     units: str = Field(..., description='The units of the result.')
     license: str = Field(..., description='The legal data license associated with the dataset defined by the owner.')
     attribution: str = Field(..., description='The legally required attribution text to be distributed with the data defined by the owner.')
-    spatial_distribution: str = Field(..., description='This describes how the spatial data are distributed. Either sparse or grid.')
+    result_type: str = Field(..., description='This describes how the results are structurally stored.')
+    # spatial_distribution: str = Field(..., description='This describes how the spatial data are distributed. Either sparse or grid.')
     geometry_type: str = Field(..., description='This describes how the spatial dimensions are stored. Point, Line, Polygon, or Collection. Follows the OGC spatial data types.')
     grouping: str = Field(..., description='This describes how the staions and the associated data are grouped. Either none or blocks.')
     extent: geometry = Field(None, description='The geographical extent of the datset as a simple rectangular polygon.')
@@ -128,6 +181,31 @@ class Dataset(DatasetBase):
         json_dumps = orjson_dumps
 
 
+class ResultAttrs(BaseModel):
+    """
+
+    """
+    result_type: ResultType
+    title: str
+    insttution: str
+    license: str
+    source: str
+    history: str
+    version: int
+
+
+# class DataVars(BaseModel):
+#     """
+
+#     """
+
+
+
+# class ResultBase(BaseModel):
+#     """
+#     Core fields of the result.
+#     """
+#     # attrs: ResultAttrs
 
 
 
