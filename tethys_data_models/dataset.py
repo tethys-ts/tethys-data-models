@@ -2,7 +2,7 @@
 Created by Mike Kittridge on 2020-11-02.
 
 For hashing the geometry of stations, use blake2b with a digest_size of 12 of the hex encoded WKB.
-Similar for the dataset_id, except that the first 8 fields (starting with feature) should be used for the hashing.
+Similar for the dataset_id, except that the first 8 fields (starting with feature) of the dataset dict should be used for the hashing.
 """
 from datetime import datetime, date
 from typing import List, Optional, Dict, Union
@@ -65,14 +65,6 @@ class TrajectoryBandsDims(BaseModel):
 
 ResultDims = Union[TimeSeriesDims, GridDims, TrajectoryDims, TimeSeriesBandsDims, GridBandsDims, TrajectoryBandsDims]
 
-# class ResultDims(BaseModel):
-#     lat: int = None
-#     lon: int = None
-#     geometry: int = None
-#     height: int
-#     time: int
-#     band: int = None
-
 
 class TimeRange(BaseModel):
     """
@@ -93,51 +85,74 @@ class Stats(BaseModel):
     count: int
 
 
-class S3ObjectKey(BaseModel):
+class ResultChunk(BaseModel):
     """
-    S3 object key and associated metadata.
+    Contain the data about a chunk object of a specific result.
     """
     key: str
     bucket: str
     content_length: int
-    etag: str = None
+    etag: str
     run_date: datetime
+    heights: Union[List[float], List[int]]
+    time_range: TimeRange = Field(..., description='The maximum time range of the result chunk.')
+
+
+class ResultVersion(BaseModel):
+    """
+    Groups the result chunks into an object. Contains information about a specific result version.
+    """
     name: str = None
-    description: str = None
+    run_date: datetime
+    content_length: int
+    doi: str = None
+    description: str = Field(None, description='Description of the results version.')
+    result_chunks: List[ResultChunk]
+
+
+class ResultVersionGroup(BaseModel):
+    """
+    Groups many result versions together with the dataset_id and station_id. This is to be saved to the *.results_versions.json.zst object.
+    """
+    dataset_id: str = Field(..., description='The dataset uuid.')
+    station_id: str = Field(..., description='station id based on the geometry')
+    result_versions: List[ResultVersion]
+
+    class Config:
+        json_loads = orjson.loads
+        json_dumps = orjson_dumps
 
 
 class StationBase(base.Station):
     """
-    Contains the base station data.
+    Contains the base station data. This is used during a processing step before other data is available (i.e. result_versions and modified_date).
     """
-    dataset_id: str = Field(..., description='The unique dataset uuid.')
+    dataset_id: str = Field(..., description='The dataset uuid.')
     dimensions: ResultDims
     heights: Union[List[float], List[int]]
-    # heights: List[int]
     time_range: TimeRange = Field(..., description='The maximum time range of the result.')
     stats: Stats
-    properties: Dict = Field(None, description='Any additional station specific properties.')
 
 
 class Station(StationBase):
     """
     Contains the complete station data.
     """
-    results_object_key: List[S3ObjectKey]
+    result_versions: List[ResultVersion]
     modified_date: datetime = Field(..., description='The modification date of the last edit.')
 
 
 class StationAgg(StationBase):
     """
-    Contains the complete station data for the combined stations in the entire dataset.
+    Contains the complete station data, but only includes the most recent results version. This object is meant to be combined with all of the other stations in a dataset (i.e. the *.stations.json.zst file).
     """
-    results_object_key: S3ObjectKey
+    result_versions: ResultVersion
     modified_date: datetime = Field(..., description='The modification date of the last edit.')
 
 
 class DatasetBase(BaseModel):
     """
-    Core fields in the dataset to create the dataset id.
+    Core fields in the dataset metadata to create the dataset_id.
     """
     feature: str = Field(..., description='The hydrologic feature associated with the dataset.')
     parameter: str = Field(..., description='The recorded observation parameter.')
@@ -151,7 +166,7 @@ class DatasetBase(BaseModel):
 
 class Dataset(DatasetBase):
     """
-    Dataset scheama.
+    Full dataset metadata schema.
     """
     dataset_id: str = Field(..., description='The unique dataset id based on the felds in the DatasetBase model.')
     units: str = Field(..., description='The units of the result.')
@@ -183,7 +198,7 @@ class Dataset(DatasetBase):
 
 class ResultAttrs(BaseModel):
     """
-
+    The result attributes that should be in the results netcdf file.
     """
     result_type: ResultType
     title: str
