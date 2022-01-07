@@ -6,7 +6,7 @@ Similar for the dataset_id, except that the first 8 fields (starting with featur
 """
 from datetime import datetime, date
 from typing import List, Optional, Dict, Union
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, conint
 import orjson
 from enum import Enum
 from tethys_data_models.utils import orjson_dumps
@@ -85,15 +85,28 @@ class Stats(BaseModel):
     count: int
 
 
+class HeightType(str, Enum):
+    """
+    Are the result chunks split by the height dimension or combined?
+    """
+    combined = 'combined'
+    split = 'split'
+
+
+class ChunkParams(BaseModel):
+    time_interval: str = Field(None, description='The chunk time interval in the form of a Pandas frequency string (e.g. 1D, 7D). The mininum time interval should be 1D. A value of None indicates that there is no chunking along the time axis.')
+    height_type: HeightType
+
+
 class ResultChunk(BaseModel):
     """
     Contain the data about a chunk object of a specific result.
     """
+    chunk_id: str
     key: str
     bucket: str
     content_length: int
     etag: str
-    run_date: datetime
     heights: Union[List[float], List[int]]
     time_range: TimeRange = Field(..., description='The maximum time range of the result chunk.')
 
@@ -102,8 +115,8 @@ class ResultVersion(BaseModel):
     """
     Groups the result chunks into an object. Contains information about a specific result version.
     """
+    version_date: datetime = Field(..., description='The date that uniquely defines this results version of the dataset and station.')
     name: str = None
-    run_date: datetime
     content_length: int
     doi: str = None
     description: str = Field(None, description='Description of the results version.')
@@ -112,7 +125,7 @@ class ResultVersion(BaseModel):
 
 class ResultVersionGroup(BaseModel):
     """
-    Groups many result versions together with the dataset_id and station_id. This is to be saved to the *.results_versions.json.zst object.
+    Groups many result versions together with the dataset_id and station_id. This is to be saved to the *.results_versions.json.zst object with all of the other stations.
     """
     dataset_id: str = Field(..., description='The dataset uuid.')
     station_id: str = Field(..., description='station id based on the geometry')
@@ -190,6 +203,7 @@ class Dataset(DatasetBase):
     properties: Dict = Field(None, description='Any additional dataset specific properties.')
     modified_date: datetime = Field(None, description='The modification date of the last edit.')
     version: int = Field(None, description='The version of the metadata structure.')
+    chunk_parameters: ChunkParams
 
     class Config:
         json_loads = orjson.loads
@@ -207,6 +221,20 @@ class ResultAttrs(BaseModel):
     source: str
     history: str
     version: int
+
+
+class ChunkID(BaseModel):
+    """
+    Model to define the hashing dict to create the chunk_id.
+    """
+    heights_index: conint(ge=0) = Field(None, description='The index location (starting with 0) of the heights array of the results. Should be omitted if the chunk should include all heights.')
+    start_date: conint(ge=-106751, le=106751) = Field(None, description='The start date of the interval for this chunk. The start date is the unix days after 1970-01-01. Can be negative for times before 1970. Should be omitted if the chunk should include all times.')
+
+    class Config:
+        json_loads = orjson.loads
+        json_dumps = orjson_dumps
+
+
 
 
 # class DataVars(BaseModel):
