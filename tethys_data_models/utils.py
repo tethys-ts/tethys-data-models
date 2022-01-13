@@ -23,7 +23,8 @@ key_patterns = {2: {
                     'stations': 'tethys/v2/{dataset_id}/stations.json.zst',
                     'station': 'tethys/v2/{dataset_id}/{station_id}/station.json.zst',
                     'dataset': 'tethys/v2/{dataset_id}/dataset.json.zst',
-                    'results_object_keys': 'tethys/v2/{dataset_id}/results_object_keys.json.zst'
+                    'results_object_keys': 'tethys/v2/{dataset_id}/results_object_keys.json.zst',
+                    'diagnostics': 'tethys/v4/diagnostics/{run_id}.json.zst'
                     },
                 3: {
                     'results': 'tethys/v3/{dataset_id}/{station_id}/{run_date}.results.nc.zst',
@@ -31,7 +32,8 @@ key_patterns = {2: {
                     'stations': 'tethys/v3/{dataset_id}.stations.json.zst',
                     'station': 'tethys/v3/{dataset_id}/{station_id}.station.json.zst',
                     'dataset': 'tethys/v3/{dataset_id}.dataset.json.zst',
-                    'results_object_keys': 'tethys/v3/{dataset_id}.results_object_keys.json.zst'
+                    'results_object_keys': 'tethys/v3/{dataset_id}.results_object_keys.json.zst',
+                    'diagnostics': 'tethys/v4/diagnostics/{run_id}.json.zst'
                     },
                 4: {
                     'results': 'tethys/v4/{dataset_id}/{station_id}/{version_date}/{chunk_id}.results.nc.zst',
@@ -39,7 +41,8 @@ key_patterns = {2: {
                     'stations': 'tethys/v4/{dataset_id}.stations.json.zst',
                     'station': 'tethys/v4/{dataset_id}/{station_id}.station.json.zst',
                     'dataset': 'tethys/v4/{dataset_id}.dataset.json.zst',
-                    'results_versions': 'tethys/v4/{dataset_id}.results_versions.json.zst'
+                    'results_versions': 'tethys/v4/{dataset_id}.results_versions.json.zst',
+                    'diagnostics': 'tethys/v4/diagnostics/{run_id}.json.zst'
                     }
                 }
 

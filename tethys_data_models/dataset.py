@@ -6,7 +6,7 @@ Similar for the dataset_id, except that the first 8 fields (starting with featur
 """
 from datetime import datetime, date
 from typing import List, Optional, Dict, Union
-from pydantic import BaseModel, Field, HttpUrl, conint
+from pydantic import BaseModel, Field, HttpUrl, conint, confloat
 import orjson
 from enum import Enum
 from tethys_data_models.utils import orjson_dumps
@@ -85,17 +85,19 @@ class Stats(BaseModel):
     count: int
 
 
-class HeightType(str, Enum):
-    """
-    Are the result chunks split by the height dimension or combined?
-    """
-    combined = 'combined'
-    split = 'split'
+# class HeightType(str, Enum):
+#     """
+#     Are the result chunks split by the height dimension or combined?
+#     """
+#     combined = 'combined'
+#     split = 'split'
 
 
 class ChunkParams(BaseModel):
-    time_interval: str = Field(None, description='The chunk time interval in the form of a Pandas frequency string (e.g. 1D, 7D). The mininum time interval should be 1D. A value of None indicates that there is no chunking along the time axis.')
-    height_type: HeightType
+    block_length: confloat(gt=0) = Field(None, description='The length in decimal degrees of the sides of the block/square for the spatial grouping. A value of None indicates that all geometries or lat/lon combos are split individually.')
+    time_interval: conint(gt=0) = Field(None, description='The chunk time interval is the number of days the time chunk should cover (e.g. 7 would be a week). A value of None indicates that there is no chunking along the time axis.')
+    # height_index_interval: conint(gt=0) = Field(None, description='The chunk height interval is the interval of height indeces that the height should be chunked. A value of None indicates that there is no chunking along the height axis.')
+    # band_index_interval: conint(gt=0) = Field(None, description='The chunk band interval is the interval of band indeces that the height should be chunked. A value of None indicates that there is no chunking along the band axis.')
 
 
 class ResultChunk(BaseModel):
@@ -105,10 +107,12 @@ class ResultChunk(BaseModel):
     chunk_id: str
     key: str
     bucket: str
-    content_length: int
+    content_length: conint(gt=0)
     etag: str
-    heights: Union[List[float], List[int]]
+    obj_id: str = Field(..., description='This is the version id given by the S3 API response when using a put_object call.')
+    height: Union[float, int]
     time_range: TimeRange = Field(..., description='The maximum time range of the result chunk.')
+    band: conint(ge=0) = None
 
 
 class ResultVersion(BaseModel):
@@ -117,7 +121,7 @@ class ResultVersion(BaseModel):
     """
     version_date: datetime = Field(..., description='The date that uniquely defines this results version of the dataset and station.')
     name: str = None
-    content_length: int
+    content_length: conint(gt=0)
     doi: str = None
     description: str = Field(None, description='Description of the results version.')
     result_chunks: List[ResultChunk]
@@ -144,6 +148,7 @@ class StationBase(base.Station):
     dimensions: ResultDims
     heights: Union[List[float], List[int]]
     time_range: TimeRange = Field(..., description='The maximum time range of the result.')
+    bands: List[int] = None
     stats: Stats
 
 
@@ -182,53 +187,55 @@ class Dataset(DatasetBase):
     Full dataset metadata schema.
     """
     dataset_id: str = Field(..., description='The unique dataset id based on the felds in the DatasetBase model.')
-    units: str = Field(..., description='The units of the result.')
+    units: str = Field(..., description='The units of the results.')
     license: str = Field(..., description='The legal data license associated with the dataset defined by the owner.')
     attribution: str = Field(..., description='The legally required attribution text to be distributed with the data defined by the owner.')
     result_type: str = Field(..., description='This describes how the results are structurally stored.')
     # spatial_distribution: str = Field(..., description='This describes how the spatial data are distributed. Either sparse or grid.')
-    geometry_type: str = Field(..., description='This describes how the spatial dimensions are stored. Point, Line, Polygon, or Collection. Follows the OGC spatial data types.')
-    grouping: str = Field(..., description='This describes how the staions and the associated data are grouped. Either none or blocks.')
+    # geometry_type: str = Field(..., description='This describes how the spatial dimensions are stored. Point, Line, Polygon, or Collection. Follows the OGC spatial data types.')
+    # spatial_grouping: str = Field(..., description='This describes how the staions and the associated data are grouped. Either none or blocks.')
     extent: geometry = Field(None, description='The geographical extent of the datset as a simple rectangular polygon.')
     time_range: TimeRange = Field(None, description='The maximum time range of the dataset.')
-    spatial_resolution: float = Field(None, description='The spatial resolution in decimal degrees if the spatial_distribution is grid.')
+    spatial_resolution: float = Field(None, description='The spatial resolution in decimal degrees if the result_type is grid.')
     heights: Union[List[float], List[int]] = Field(None, description='The heights from all available results in the dataset.')
     cf_standard_name: str = Field(None, description='The CF conventions standard name for the parameter.')
     wrf_standard_name: str = Field(None, description='The WRF standard name for the parameter.')
     precision: float = Field(None, description='The decimal precision of the result values.')
     description: str = Field(None, description='Dataset description.')
     product_description: str = Field(None, description='Overall description of the product if method is simulation.')
-    processing_code: int = Field(None, description='The processing code to determine how the input data should be processed.')
+    processing_code: conint(gt=0, lt=7) = Field(None, description='The processing code to determine how the input data should be processed.')
     parent_datasets: List[str] = Field(None, description='The parent datasets that this dataset was derived from.')
     properties: Dict = Field(None, description='Any additional dataset specific properties.')
     modified_date: datetime = Field(None, description='The modification date of the last edit.')
-    version: int = Field(None, description='The version of the metadata structure.')
-    chunk_parameters: ChunkParams
+    version: conint(gt=1) = Field(None, description='The version of the metadata structure.')
+    bands: List[conint(ge=0)] = None
+    chunk_parameters: ChunkParams = None
 
     class Config:
         json_loads = orjson.loads
         json_dumps = orjson_dumps
 
 
-class ResultAttrs(BaseModel):
-    """
-    The result attributes that should be in the results netcdf file.
-    """
-    result_type: ResultType
-    title: str
-    insttution: str
-    license: str
-    source: str
-    history: str
-    version: int
+# class ResultAttrs(BaseModel):
+#     """
+#     The result attributes that should be in the results netcdf file.
+#     """
+#     result_type: ResultType
+#     title: str
+#     institution: str
+#     license: str
+#     source: str
+#     history: str
+#     version: int
 
 
 class ChunkID(BaseModel):
     """
     Model to define the hashing dict to create the chunk_id.
     """
-    heights_index: conint(ge=0) = Field(None, description='The index location (starting with 0) of the heights array of the results. Should be omitted if the chunk should include all heights.')
-    start_date: conint(ge=-106751, le=106751) = Field(None, description='The start date of the interval for this chunk. The start date is the unix days after 1970-01-01. Can be negative for times before 1970. Should be omitted if the chunk should include all times.')
+    height: int = Field(None, description='The height multiplied by 1000 (so that it is in mm). Should be omitted if the results does not have height as part of the dimensions.')
+    start_date: conint(ge=-106751, le=106751) = Field(None, description='The start date of the interval for this chunk. The start date is the number of days after 1677-09-22 (minimum possible date). Can be negative for times before 1970. Should be omitted if the chunk should include all times or if time is not part of the dimensions.')
+    band: conint(ge=0) = Field(None, description='The band (starting with 0) of the bands array of the results. Should be omitted if the results does not have band as part of the dimensions.')
 
     class Config:
         json_loads = orjson.loads
