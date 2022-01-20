@@ -65,6 +65,15 @@ class TrajectoryBandsDims(BaseModel):
 
 ResultDims = Union[TimeSeriesDims, GridDims, TrajectoryDims, TimeSeriesBandsDims, GridBandsDims, TrajectoryBandsDims]
 
+result_type_dict = {
+    'time_series': TimeSeriesDims,
+    'grid': GridDims,
+    'trajectory': TrajectoryDims,
+    'time_series_bands': TimeSeriesBandsDims,
+    'grid_bands': GridBandsDims,
+    'trajectory_bands': TrajectoryBandsDims,
+    }
+
 
 class TimeRange(BaseModel):
     """
@@ -216,6 +225,21 @@ class Dataset(DatasetBase):
         json_dumps = orjson_dumps
 
 
+class ParameterAttrs(DatasetBase):
+    """
+
+    """
+    dataset_id: str = Field(..., description='The unique dataset id based on the felds in the DatasetBase model.')
+    units: str = Field(..., description='The units of the results.')
+    license: str = Field(..., description='The legal data license associated with the dataset defined by the owner.')
+    attribution: str = Field(..., description='The legally required attribution text to be distributed with the data defined by the owner.')
+    result_type: str = Field(..., description='This describes how the results are structurally stored.')
+    cf_standard_name: str = Field(None, description='The CF conventions standard name for the parameter.')
+    wrf_standard_name: str = Field(None, description='The WRF standard name for the parameter.')
+    precision: float = Field(None, description='The decimal precision of the result values.')
+    description: str = Field(None, description='Dataset description.')
+
+
 # class ResultAttrs(BaseModel):
 #     """
 #     The result attributes that should be in the results netcdf file.
@@ -242,6 +266,20 @@ class ChunkID(BaseModel):
         json_dumps = orjson_dumps
 
 
+class Dtype(str, Enum):
+    int8 = 'int8'
+    int16 = 'int16'
+    int32 = 'int32'
+    int64 = 'int64'
+
+
+class ResultsEncoding(BaseModel):
+    """
+
+    """
+    scale_factor: float = None
+    dtype: Dtype
+    _FillValue: int
 
 
 # class DataVars(BaseModel):
