@@ -5,7 +5,7 @@ For hashing the geometry of stations, use blake2b with a digest_size of 12 of th
 Similar for the dataset_id, except that the first 8 fields (starting with feature) of the dataset dict should be used for the hashing.
 """
 from datetime import datetime, date
-from typing import List, Optional, Dict, Union
+from typing import List, Optional, Dict, Union, Literal
 from pydantic import BaseModel, Field, HttpUrl, conint, confloat
 import orjson
 from enum import Enum
@@ -266,19 +266,12 @@ class ChunkID(BaseModel):
         json_dumps = orjson_dumps
 
 
-class Dtype(str, Enum):
-    int8 = 'int8'
-    int16 = 'int16'
-    int32 = 'int32'
-    int64 = 'int64'
-
-
 class ResultsEncoding(BaseModel):
     """
 
     """
     scale_factor: float = None
-    dtype: Dtype
+    dtype: Literal['int8', 'int16', 'int32', 'int64']
     _FillValue: int
 
 
