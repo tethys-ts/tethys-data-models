@@ -258,7 +258,7 @@ class ChunkID(BaseModel):
     Model to define the hashing dict to create the chunk_id.
     """
     height: int = Field(None, description='The height multiplied by 1000 (so that it is in mm). Should be omitted if the results does not have height as part of the dimensions.')
-    start_date: conint(ge=-106751, le=106751) = Field(None, description='The start date of the interval for this chunk. The start date is the number of days after 1677-09-22 (minimum possible date). Can be negative for times before 1970. Should be omitted if the chunk should include all times or if time is not part of the dimensions.')
+    start_day: conint(ge=-106751, le=106751) = Field(None, description='The start day of the interval for this chunk. The start day is the number of days after 1970-01-01. Can be negative for days before 1970-01-01 with a minimum of -106751, which is 1677-09-22 (minimum possible date). The maximum value is 106751. Should be omitted if the chunk should include all times or if time is not part of the dimensions.')
     band: conint(ge=0) = Field(None, description='The band (starting with 0) of the bands array of the results. Should be omitted if the results does not have band as part of the dimensions.')
 
     class Config:
