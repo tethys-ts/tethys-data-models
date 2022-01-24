@@ -27,16 +27,16 @@ class ResultType(str, Enum):
 
 
 class TimeSeriesDims(BaseModel):
+    time: int
     geometry: int
     height: int
-    time: int
 
 
 class GridDims(BaseModel):
+    time: int
     lat: int
     lon: int
     height: int
-    time: int
 
 
 class TrajectoryDims(BaseModel):
@@ -44,17 +44,17 @@ class TrajectoryDims(BaseModel):
 
 
 class TimeSeriesBandsDims(BaseModel):
+    time: int
     geometry: int
     height: int
-    time: int
     band: int
 
 
 class GridBandsDims(BaseModel):
+    time: int
     lat: int
     lon: int
     height: int
-    time: int
     band: int
 
 
