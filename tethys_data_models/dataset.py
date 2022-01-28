@@ -111,42 +111,66 @@ class ChunkParams(BaseModel):
 
 class ResultChunk(BaseModel):
     """
-    Contain the data about a chunk object of a specific result.
+    Contain the data about a chunk object of a result.
     """
-    chunk_id: str
-    key: str
-    bucket: str
+    chunk_id: str = Field(..., description='The chunk id that is unique within this station.')
+    key: str = Field(..., description='The S3 key where this results chunk is stored. This will be totally unique for this results chunk.')
+    # bucket: str
     content_length: conint(gt=0)
     # etag: str
     # obj_id: str = Field(..., description='This is the version id given by the S3 API response when using a put_object call.')
+    version_date: datetime = Field(..., description='The date that uniquely defines this results version of the dataset and station.')
+    chunk_hash: str = Field(..., description='The hash of the results data stored in the chunk.')
+    dataset_id: str = Field(..., description='The dataset uuid.')
+    station_id: str = Field(..., description='station id based on the geometry.')
     height: int = Field(None, description='The height multiplied by 1000 (so that it is in mm). Should be omitted if the results does not have height as part of the dimensions.')
     chunk_day: conint(ge=-106751, le=106751) = Field(None, description='The start day of the interval for this chunk. The chunk day is the number of days after 1970-01-01. Can be negative for days before 1970-01-01 with a minimum of -106751, which is 1677-09-22 (minimum possible date). The maximum value is 106751. Should be omitted if the chunk should include all times or if time is not part of the dimensions.')
     band: conint(ge=0) = Field(None, description='The band (starting with 0) of the bands array of the results. Should be omitted if the results does not have band as part of the dimensions.')
 
+    class Config:
+        json_loads = orjson.loads
+        json_dumps = orjson_dumps
+
 
 class ResultVersion(BaseModel):
     """
-    Groups the result chunks into an object. Contains information about a specific result version.
-    """
-    version_date: datetime = Field(..., description='The date that uniquely defines this results version of the dataset and station.')
-    name: str = None
-    content_length: conint(gt=0)
-    doi: str = None
-    description: str = Field(None, description='Description of the results version.')
-    result_chunks: List[ResultChunk]
-
-
-class ResultVersionGroup(BaseModel):
-    """
-    Groups many result versions together with the dataset_id and station_id. This is to be saved to the *.results_versions.json.zst object with all of the other stations.
+    Contains information about results versions for a dataset.
     """
     dataset_id: str = Field(..., description='The dataset uuid.')
-    station_id: str = Field(..., description='station id based on the geometry')
-    result_versions: List[ResultVersion]
+    version_date: datetime = Field(..., description='The date that uniquely defines this results version of the dataset and station.')
+    name: str = None
+    doi: HttpUrl = Field(None, description='The digital object identifier (DOI) for this specific version of the dataset. This should be in the form of an http URL.')
+    description: str = Field(None, description='Description of the results version.')
 
     class Config:
         json_loads = orjson.loads
         json_dumps = orjson_dumps
+
+
+# class ResultVersionGroup(BaseModel):
+#     """
+#     Groups many result versions together with the dataset_id and station_id. This is to be saved to the *.results_versions.json.zst object with all of the other stations.
+#     """
+#     dataset_id: str = Field(..., description='The dataset uuid.')
+#     station_id: str = Field(..., description='station id based on the geometry')
+#     result_versions: List[ResultVersion]
+#
+#     class Config:
+#         json_loads = orjson.loads
+#         json_dumps = orjson_dumps
+
+
+# class ResultVersionGroup(BaseModel):
+#     """
+#     Groups many result versions and chunks together with the dataset_id. This is to be saved to the *.results_versions.json.zst object with all of the other stations.
+#     """
+#     dataset_id: str = Field(..., description='The dataset uuid.')
+#     result_versions: List[ResultVersion]
+#     result_chunks: List[ResultChunk]
+#
+#     class Config:
+#         json_loads = orjson.loads
+#         json_dumps = orjson_dumps
 
 
 class StationBase(base.Station):
@@ -165,7 +189,7 @@ class Station(StationBase):
     """
     Contains the complete station data.
     """
-    result_versions: List[ResultVersion]
+    result_chunks: List[ResultChunk]
     modified_date: datetime = Field(..., description='The modification date of the last edit.')
 
 
@@ -173,7 +197,6 @@ class StationAgg(StationBase):
     """
     Contains the complete station data, but only includes the most recent results version. This object is meant to be combined with all of the other stations in a dataset (i.e. the *.stations.json.zst file).
     """
-    result_versions: ResultVersion
     modified_date: datetime = Field(..., description='The modification date of the last edit.')
 
 
@@ -209,14 +232,14 @@ class Dataset(DatasetBase):
     heights: Union[List[float], List[int]] = Field(None, description='The heights from all available results in the dataset.')
     cf_standard_name: str = Field(None, description='The CF conventions standard name for the parameter.')
     wrf_standard_name: str = Field(None, description='The WRF standard name for the parameter.')
-    precision: float = Field(None, description='The decimal precision of the result values.')
+    precision: float = Field(..., description='The decimal precision of the result values.')
     description: str = Field(None, description='Dataset description.')
     product_description: str = Field(None, description='Overall description of the product if method is simulation.')
-    processing_code: conint(gt=0, lt=7) = Field(None, description='The processing code to determine how the input data should be processed.')
+    # processing_code: conint(gt=0, lt=7) = Field(None, description='The processing code to determine how the input data should be processed.')
     parent_datasets: List[str] = Field(None, description='The parent datasets that this dataset was derived from.')
     properties: Dict = Field(None, description='Any additional dataset specific properties.')
     modified_date: datetime = Field(None, description='The modification date of the last edit.')
-    version: conint(gt=1) = Field(None, description='The version of the metadata structure.')
+    system_version: conint(gt=1) = Field(None, description='The version of the metadata structure.')
     bands: List[conint(ge=0)] = None
     chunk_parameters: ChunkParams = None
 
@@ -257,6 +280,7 @@ class ChunkID(BaseModel):
     """
     Model to define the hashing dict to create the chunk_id.
     """
+    # station_id: str = Field(..., description='station id based on the geometry')
     height: int = Field(None, description='The height multiplied by 1000 (so that it is in mm). Should be omitted if the results does not have height as part of the dimensions.')
     chunk_day: conint(ge=-106751, le=106751) = Field(None, description='The start day of the interval for this chunk. The chunk day is the number of days after 1970-01-01. Can be negative for days before 1970-01-01 with a minimum of -106751, which is 1677-09-22 (minimum possible date). The maximum value is 106751. Should be omitted if the chunk should include all times or if time is not part of the dimensions.')
     band: conint(ge=0) = Field(None, description='The band (starting with 0) of the bands array of the results. Should be omitted if the results does not have band as part of the dimensions.')
@@ -268,11 +292,11 @@ class ChunkID(BaseModel):
 
 class ResultsEncoding(BaseModel):
     """
-
+    The encoding model for saving xaaray Datasets to netcdf.
     """
     scale_factor: float = None
     dtype: Literal['int8', 'int16', 'int32', 'int64']
-    _FillValue: int
+    _FillValue: int = None
 
 
 # class DataVars(BaseModel):
