@@ -141,6 +141,7 @@ class ResultVersion(BaseModel):
     name: str = None
     doi: HttpUrl = Field(None, description='The digital object identifier (DOI) for this specific version of the dataset. This should be in the form of an http URL.')
     description: str = Field(None, description='Description of the results version.')
+    modified_date: datetime = Field(..., description='The modification date of the last edit.')
 
     class Config:
         json_loads = orjson.loads
@@ -160,17 +161,17 @@ class ResultVersion(BaseModel):
 #         json_dumps = orjson_dumps
 
 
-# class ResultVersionGroup(BaseModel):
-#     """
-#     Groups many result versions and chunks together with the dataset_id. This is to be saved to the *.results_versions.json.zst object with all of the other stations.
-#     """
-#     dataset_id: str = Field(..., description='The dataset uuid.')
-#     result_versions: List[ResultVersion]
-#     result_chunks: List[ResultChunk]
-#
-#     class Config:
-#         json_loads = orjson.loads
-#         json_dumps = orjson_dumps
+class ResultVersionGroup(BaseModel):
+    """
+    Groups many result versions and chunks together with the dataset_id. This is to be saved to the *.results_versions.json.zst object with all of the other stations.
+    """
+    # dataset_id: str = Field(..., description='The dataset uuid.')
+    results_versions: List[ResultVersion]
+    results_chunks: List[ResultChunk]
+
+    class Config:
+        json_loads = orjson.loads
+        json_dumps = orjson_dumps
 
 
 class StationBase(base.Station):
@@ -189,7 +190,7 @@ class Station(StationBase):
     """
     Contains the complete station data.
     """
-    result_chunks: List[ResultChunk]
+    results_chunks: List[ResultChunk]
     modified_date: datetime = Field(..., description='The modification date of the last edit.')
 
 
