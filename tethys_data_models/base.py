@@ -26,7 +26,8 @@ class ConnectionConfig(BaseModel):
 
 class Remote(BaseModel):
     bucket: str
-    connection_config: Union[ConnectionConfig, HttpUrl]
+    connection_config: ConnectionConfig = None
+    public_url: HttpUrl = None
     version: int = Field(None, description='Version of the S3 data structure.')
     description: str = Field(None, description='Description of the datasets that are contained within the remote.')
 
