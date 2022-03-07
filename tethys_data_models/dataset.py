@@ -161,17 +161,17 @@ class ResultVersion(BaseModel):
 #         json_dumps = orjson_dumps
 
 
-class ResultVersionGroup(BaseModel):
-    """
-    Groups many result versions and chunks together with the dataset_id. This is to be saved to the *.results_versions.json.zst object with all of the other stations.
-    """
-    # dataset_id: str = Field(..., description='The dataset uuid.')
-    results_versions: List[ResultVersion]
-    results_chunks: List[ResultChunk]
+# class ResultVersionGroup(BaseModel):
+#     """
+#     Groups many result versions and chunks together with the dataset_id. This is to be saved to the *.results_versions.json.zst object with all of the other stations.
+#     """
+#     # dataset_id: str = Field(..., description='The dataset uuid.')
+#     results_versions: List[ResultVersion]
+#     results_chunks: List[ResultChunk]
 
-    class Config:
-        json_loads = orjson.loads
-        json_dumps = orjson_dumps
+#     class Config:
+#         json_loads = orjson.loads
+#         json_dumps = orjson_dumps
 
 
 class StationBase(base.Station):
@@ -196,7 +196,7 @@ class Station(StationBase):
 
 class StationAgg(StationBase):
     """
-    Contains the complete station data, but only includes the most recent results version. This object is meant to be combined with all of the other stations in a dataset (i.e. the *.stations.json.zst file).
+    Contains the complete station data, but does not include the results chunks. version. This object is meant to be combined with all of the other stations in a dataset (i.e. the *.stations.json.zst file).
     """
     modified_date: datetime = Field(..., description='The modification date of the last edit.')
 
