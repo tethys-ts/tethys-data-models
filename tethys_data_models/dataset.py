@@ -293,11 +293,11 @@ class ChunkID(BaseModel):
 
 class ResultsEncoding(BaseModel):
     """
-    The encoding model for saving xaaray Datasets to netcdf.
+    The encoding model for saving xarray Datasets to netcdf.
     """
-    scale_factor: float = None
+    scale_factor: float
     dtype: Literal['int8', 'int16', 'int32', 'int64']
-    _FillValue: int = None
+    _FillValue: int
 
 
 # class DataVars(BaseModel):
