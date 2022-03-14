@@ -95,7 +95,7 @@ class Stats(BaseModel):
 
 
 class ChunkParams(BaseModel):
-    block_length: confloat(gte=0) = Field(..., description='The length in decimal degrees of the sides of the block/square for the spatial grouping. A value of 0 indicates that all geometries or lat/lon combos are split individually.')
+    block_length: confloat(ge=0) = Field(..., description='The length in decimal degrees of the sides of the block/square for the spatial grouping. A value of 0 indicates that all geometries or lat/lon combos are split individually.')
     time_interval: conint(gt=0) = Field(..., description='The chunk time interval is the number of days the time chunk should cover (e.g. 7 would be a week).')
 
 
