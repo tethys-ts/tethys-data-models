@@ -94,19 +94,9 @@ class Stats(BaseModel):
     count: int
 
 
-# class HeightType(str, Enum):
-#     """
-#     Are the result chunks split by the height dimension or combined?
-#     """
-#     combined = 'combined'
-#     split = 'split'
-
-
 class ChunkParams(BaseModel):
-    block_length: confloat(gt=0) = Field(None, description='The length in decimal degrees of the sides of the block/square for the spatial grouping. A value of None indicates that all geometries or lat/lon combos are split individually.')
-    time_interval: conint(gt=0) = Field(None, description='The chunk time interval is the number of days the time chunk should cover (e.g. 7 would be a week). A value of None indicates that there is no chunking along the time axis.')
-    # height_index_interval: conint(gt=0) = Field(None, description='The chunk height interval is the interval of height indeces that the height should be chunked. A value of None indicates that there is no chunking along the height axis.')
-    # band_index_interval: conint(gt=0) = Field(None, description='The chunk band interval is the interval of band indeces that the height should be chunked. A value of None indicates that there is no chunking along the band axis.')
+    block_length: confloat(gte=0) = Field(..., description='The length in decimal degrees of the sides of the block/square for the spatial grouping. A value of 0 indicates that all geometries or lat/lon combos are split individually.')
+    time_interval: conint(gt=0) = Field(..., description='The chunk time interval is the number of days the time chunk should cover (e.g. 7 would be a week).')
 
 
 class ResultChunk(BaseModel):
@@ -223,7 +213,7 @@ class Dataset(DatasetBase):
     units: str = Field(..., description='The units of the results.')
     license: str = Field(..., description='The legal data license associated with the dataset defined by the owner.')
     attribution: str = Field(..., description='The legally required attribution text to be distributed with the data defined by the owner.')
-    result_type: str = Field(..., description='This describes how the results are structurally stored.')
+    result_type: ResultType = Field(..., description='This describes how the results are structurally stored.')
     # spatial_distribution: str = Field(..., description='This describes how the spatial data are distributed. Either sparse or grid.')
     # geometry_type: str = Field(..., description='This describes how the spatial dimensions are stored. Point, Line, Polygon, or Collection. Follows the OGC spatial data types.')
     # spatial_grouping: str = Field(..., description='This describes how the staions and the associated data are grouped. Either none or blocks.')
@@ -242,7 +232,7 @@ class Dataset(DatasetBase):
     modified_date: datetime = Field(None, description='The modification date of the last edit.')
     system_version: conint(gt=1) = Field(None, description='The version of the metadata structure.')
     bands: List[conint(ge=0)] = None
-    chunk_parameters: ChunkParams = None
+    chunk_parameters: ChunkParams
 
     class Config:
         json_loads = orjson.loads
@@ -257,7 +247,7 @@ class ParameterAttrs(DatasetBase):
     units: str = Field(..., description='The units of the results.')
     license: str = Field(..., description='The legal data license associated with the dataset defined by the owner.')
     attribution: str = Field(..., description='The legally required attribution text to be distributed with the data defined by the owner.')
-    result_type: str = Field(..., description='This describes how the results are structurally stored.')
+    result_type: ResultType = Field(..., description='This describes how the results are structurally stored.')
     cf_standard_name: str = Field(None, description='The CF conventions standard name for the parameter.')
     wrf_standard_name: str = Field(None, description='The WRF standard name for the parameter.')
     precision: float = Field(None, description='The decimal precision of the result values.')
