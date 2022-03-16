@@ -83,15 +83,15 @@ class TimeRange(BaseModel):
     to_date: datetime
 
 
-class Stats(BaseModel):
-    """
-    Statistics related to the results.
-    """
-    min: float
-    max: float
-    mean: float
-    median: float
-    count: int
+# class Stats(BaseModel):
+#     """
+#     Statistics related to the results.
+#     """
+#     min: float
+#     max: float
+#     mean: float
+#     median: float
+#     count: int
 
 
 class ChunkParams(BaseModel):
@@ -173,7 +173,7 @@ class StationBase(base.Station):
     heights: Union[List[float], List[int]]
     time_range: TimeRange = Field(..., description='The maximum time range of the result.')
     bands: List[int] = None
-    stats: Stats
+    # stats: Stats
 
 
 class Station(StationBase):
