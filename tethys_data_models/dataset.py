@@ -113,9 +113,12 @@ class ResultChunk(BaseModel):
     chunk_hash: str = Field(..., description='The hash of the results data stored in the chunk.')
     dataset_id: str = Field(..., description='The dataset uuid.')
     station_id: str = Field(..., description='station id based on the geometry.')
-    height: int = Field(None, description='The height multiplied by 1000 (so that it is in mm). Should be omitted if the results does not have height as part of the dimensions.')
-    chunk_day: conint(ge=-106751, le=106751) = Field(None, description='The start day of the interval for this chunk. The chunk day is the number of days after 1970-01-01. Can be negative for days before 1970-01-01 with a minimum of -106751, which is 1677-09-22 (minimum possible date). The maximum value is 106751. Should be omitted if the chunk should include all times or if time is not part of the dimensions.')
+    height: int = Field(..., description='The height multiplied by 1000 (so that it is in mm). Should be omitted if the results does not have height as part of the dimensions.')
+    chunk_day: conint(ge=-106751, le=106751) = Field(..., description='The start day of the interval for this chunk. The chunk day is the number of days after 1970-01-01. Can be negative for days before 1970-01-01 with a minimum of -106751, which is 1677-09-22 (minimum possible date). The maximum value is 106751. Should be omitted if time is not part of the dimensions.')
     band: conint(ge=0) = Field(None, description='The band (starting with 0) of the bands array of the results. Should be omitted if the results does not have band as part of the dimensions.')
+    n_times: conint(ge=0) = Field(None, description='The length of the time dimension array.')
+    from_date: datetime
+    to_date: datetime
 
     class Config:
         json_loads = orjson.loads
@@ -174,6 +177,7 @@ class StationBase(base.Station):
     time_range: TimeRange = Field(..., description='The maximum time range of the result.')
     bands: List[int] = None
     # stats: Stats
+    modified_date: datetime = Field(..., description='The modification date of the last edit.')
 
 
 class Station(StationBase):
@@ -181,14 +185,15 @@ class Station(StationBase):
     Contains the complete station data.
     """
     results_chunks: List[ResultChunk]
-    modified_date: datetime = Field(..., description='The modification date of the last edit.')
+    content_length: conint(gt=0)
+#     modified_date: datetime = Field(..., description='The modification date of the last edit.')
 
 
-class StationAgg(StationBase):
-    """
-    Contains the complete station data, but does not include the results chunks. version. This object is meant to be combined with all of the other stations in a dataset (i.e. the *.stations.json.zst file).
-    """
-    modified_date: datetime = Field(..., description='The modification date of the last edit.')
+# class StationAgg(StationBase):
+#     """
+#     Contains the complete station data, but does not include the results chunks. version. This object is meant to be combined with all of the other stations in a dataset (i.e. the *.stations.json.zst file).
+#     """
+#     modified_date: datetime = Field(..., description='The modification date of the last edit.')
 
 
 class DatasetBase(BaseModel):
@@ -252,6 +257,8 @@ class ParameterAttrs(DatasetBase):
     wrf_standard_name: str = Field(None, description='The WRF standard name for the parameter.')
     precision: float = Field(None, description='The decimal precision of the result values.')
     description: str = Field(None, description='Dataset description.')
+    block_length: confloat(ge=0) = Field(..., description='The length in decimal degrees of the sides of the block/square for the spatial grouping. A value of 0 indicates that all geometries or lat/lon combos are split individually.')
+    time_interval: conint(gt=0) = Field(..., description='The chunk time interval is the number of days the time chunk should cover (e.g. 7 would be a week).')
 
 
 # class ResultAttrs(BaseModel):
