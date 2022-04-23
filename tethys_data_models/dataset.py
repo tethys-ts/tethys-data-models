@@ -40,7 +40,7 @@ class GridDims(BaseModel):
 
 
 class TrajectoryDims(BaseModel):
-    geometry: int
+    time: int
 
 
 class TimeSeriesBandsDims(BaseModel):
@@ -59,7 +59,7 @@ class GridBandsDims(BaseModel):
 
 
 class TrajectoryBandsDims(BaseModel):
-    geometry: int
+    time: int
     band: int
 
 
@@ -113,9 +113,9 @@ class ResultChunk(BaseModel):
     chunk_hash: str = Field(..., description='The hash of the results data stored in the chunk.')
     dataset_id: str = Field(..., description='The dataset uuid.')
     station_id: str = Field(..., description='station id based on the geometry.')
-    height: int = Field(..., description='The height multiplied by 1000 (so that it is in mm). Should be omitted if the results does not have height as part of the dimensions.')
-    chunk_day: conint(ge=-106751, le=106751) = Field(..., description='The start day of the interval for this chunk. The chunk day is the number of days after 1970-01-01. Can be negative for days before 1970-01-01 with a minimum of -106751, which is 1677-09-22 (minimum possible date). The maximum value is 106751. Should be omitted if time is not part of the dimensions.')
-    band: conint(ge=0) = Field(None, description='The band (starting with 0) of the bands array of the results. Should be omitted if the results does not have band as part of the dimensions.')
+    height: int = Field(..., description='The height multiplied by 1000 (so that it is in mm). Should be omitted if the results do not have height as part of the dimensions.')
+    chunk_day: conint(ge=-106751, le=106751) = Field(..., description='The start day of the interval for this chunk. The chunk day is the number of days after 1970-01-01. Can be negative for days before 1970-01-01 with a minimum of -106751, which is 1677-09-22 (minimum possible date). The maximum value is 106751.')
+    band: conint(ge=0) = Field(None, description='The band (starting with 0) of the bands array of the results. Should be omitted if the results do not have band as part of the dimensions.')
     n_times: conint(ge=0) = Field(None, description='The length of the time dimension array.')
     from_date: datetime
     to_date: datetime
@@ -200,8 +200,8 @@ class DatasetBase(BaseModel):
     """
     Core fields in the dataset metadata to create the dataset_id.
     """
-    feature: str = Field(..., description='The hydrologic feature associated with the dataset.')
-    parameter: str = Field(..., description='The recorded observation parameter.')
+    feature: str = Field(..., description='The geographic feature associated with the dataset.')
+    parameter: str = Field(..., description='The observation parameter name.')
     method: str = Field(..., description='The way the recorded observation was obtained.')
     product_code: str = Field(..., description='The code associated with kind of product produced. This could be generic codes like raw_data or quality_controlled; or it could be more uniquely identifying the simulation product that was produced.')
     owner: str = Field(..., description='The operator, owner, and/or producer of the associated data.')
@@ -219,9 +219,6 @@ class Dataset(DatasetBase):
     license: str = Field(..., description='The legal data license associated with the dataset defined by the owner.')
     attribution: str = Field(..., description='The legally required attribution text to be distributed with the data defined by the owner.')
     result_type: ResultType = Field(..., description='This describes how the results are structurally stored.')
-    # spatial_distribution: str = Field(..., description='This describes how the spatial data are distributed. Either sparse or grid.')
-    # geometry_type: str = Field(..., description='This describes how the spatial dimensions are stored. Point, Line, Polygon, or Collection. Follows the OGC spatial data types.')
-    # spatial_grouping: str = Field(..., description='This describes how the staions and the associated data are grouped. Either none or blocks.')
     extent: geometry = Field(None, description='The geographical extent of the datset as a simple rectangular polygon.')
     time_range: TimeRange = Field(None, description='The maximum time range of the dataset.')
     spatial_resolution: float = Field(None, description='The spatial resolution in decimal degrees if the result_type is grid.')
@@ -230,8 +227,7 @@ class Dataset(DatasetBase):
     wrf_standard_name: str = Field(None, description='The WRF standard name for the parameter.')
     precision: float = Field(..., description='The decimal precision of the result values.')
     description: str = Field(None, description='Dataset description.')
-    product_description: str = Field(None, description='Overall description of the product if method is simulation.')
-    # processing_code: conint(gt=0, lt=7) = Field(None, description='The processing code to determine how the input data should be processed.')
+    product_description: str = Field(None, description='Overall description of the product if method.')
     parent_datasets: List[str] = Field(None, description='The parent datasets that this dataset was derived from.')
     properties: Dict = Field(None, description='Any additional dataset specific properties.')
     modified_date: datetime = Field(None, description='The modification date of the last edit.')
@@ -279,9 +275,9 @@ class ChunkID(BaseModel):
     Model to define the hashing dict to create the chunk_id.
     """
     # station_id: str = Field(..., description='station id based on the geometry')
-    height: int = Field(None, description='The height multiplied by 1000 (so that it is in mm). Should be omitted if the results does not have height as part of the dimensions.')
-    chunk_day: conint(ge=-106751, le=106751) = Field(None, description='The start day of the interval for this chunk. The chunk day is the number of days after 1970-01-01. Can be negative for days before 1970-01-01 with a minimum of -106751, which is 1677-09-22 (minimum possible date). The maximum value is 106751. Should be omitted if the chunk should include all times or if time is not part of the dimensions.')
-    band: conint(ge=0) = Field(None, description='The band (starting with 0) of the bands array of the results. Should be omitted if the results does not have band as part of the dimensions.')
+    chunk_day: conint(ge=-106751, le=106751) = Field(..., description='The start day of the interval for this chunk. The chunk day is the number of days after 1970-01-01. Can be negative for days before 1970-01-01 with a minimum of -106751, which is 1677-09-22 (minimum possible date). The maximum value is 106751.')
+    height: int = Field(None, description='The height multiplied by 1000 (so that it is in mm). Should be omitted if the results do not have height as part of the dimensions.')
+    band: conint(ge=0) = Field(None, description='The band (starting with 0) of the bands array of the results. Should be omitted if the results do not have band as part of the dimensions.')
 
     class Config:
         json_loads = orjson.loads
@@ -295,21 +291,6 @@ class ResultsEncoding(BaseModel):
     scale_factor: float
     dtype: Literal['int8', 'int16', 'int32', 'int64']
     _FillValue: int
-
-
-# class DataVars(BaseModel):
-#     """
-
-#     """
-
-
-
-# class ResultBase(BaseModel):
-#     """
-#     Core fields of the result.
-#     """
-#     # attrs: ResultAttrs
-
 
 
 # class Result(BaseModel):

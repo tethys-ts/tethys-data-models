@@ -10,7 +10,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 # General parameters
 name = "tethys-data-models"
 main_package = "tethys_data_models"
-version = "0.4.6"
+version = "0.4.7"
 descrip = "Various data models used in data validation for Tethys"
 
 # The below code is for readthedocs. To have sphinx/readthedocs interact with
