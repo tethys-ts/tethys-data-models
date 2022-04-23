@@ -41,6 +41,7 @@ key_patterns = {2: {
                     'results': 'tethys/v4/{dataset_id}/{version_date}/{station_id}/{chunk_id}.results.nc.zst',
                     'datasets': 'tethys/v4.datasets.json.zst',
                     'stations': 'tethys/v4/{dataset_id}/{version_date}.stations.json.zst',
+                    'latest_stations': 'tethys/v4/{dataset_id}.stations.json.zst',
                     'station': 'tethys/v4/{dataset_id}/{version_date}/{station_id}.station.json.zst',
                     'latest_station': 'tethys/v4/{dataset_id}/{station_id}.station.json.zst',
                     'dataset': 'tethys/v4/{dataset_id}.dataset.json.zst',
