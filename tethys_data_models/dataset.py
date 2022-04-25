@@ -109,7 +109,7 @@ class ResultChunk(BaseModel):
     content_length: conint(gt=0)
     # etag: str
     # obj_id: str = Field(..., description='This is the version id given by the S3 API response when using a put_object call.')
-    version_date: datetime = Field(..., description='The date that uniquely defines this results version of the dataset and station.')
+    version_date: datetime = Field(..., description='The date that uniquely defines this results chunk version of the dataset and station.')
     chunk_hash: str = Field(..., description='The hash of the results data stored in the chunk.')
     dataset_id: str = Field(..., description='The dataset uuid.')
     station_id: str = Field(..., description='station id based on the geometry.')
@@ -167,25 +167,24 @@ class ResultVersion(BaseModel):
 #         json_dumps = orjson_dumps
 
 
-class StationBase(base.Station):
+class Station(base.Station):
     """
-    Contains the base station data. This is used during a processing step before other data is available (i.e. result_versions and modified_date).
+    Contains the station data.
     """
     dataset_id: str = Field(..., description='The dataset uuid.')
     dimensions: ResultDims
-    heights: Union[List[float], List[int]]
     time_range: TimeRange = Field(..., description='The maximum time range of the result.')
+    heights: Union[List[float], List[int]]
     bands: List[int] = None
-    # stats: Stats
     modified_date: datetime = Field(..., description='The modification date of the last edit.')
 
 
-class Station(StationBase):
-    """
-    Contains the complete station data.
-    """
-    results_chunks: List[ResultChunk]
-    content_length: conint(gt=0)
+# class Station(StationBase):
+#     """
+#     Contains the complete station data.
+#     """
+#     results_chunks: List[ResultChunk]
+#     content_length: conint(gt=0)
 #     modified_date: datetime = Field(..., description='The modification date of the last edit.')
 
 
@@ -222,7 +221,6 @@ class Dataset(DatasetBase):
     extent: geometry = Field(None, description='The geographical extent of the datset as a simple rectangular polygon.')
     time_range: TimeRange = Field(None, description='The maximum time range of the dataset.')
     spatial_resolution: float = Field(None, description='The spatial resolution in decimal degrees if the result_type is grid.')
-    heights: Union[List[float], List[int]] = Field(None, description='The heights from all available results in the dataset.')
     cf_standard_name: str = Field(None, description='The CF conventions standard name for the parameter.')
     wrf_standard_name: str = Field(None, description='The WRF standard name for the parameter.')
     precision: float = Field(..., description='The decimal precision of the result values.')
@@ -232,6 +230,7 @@ class Dataset(DatasetBase):
     properties: Dict = Field(None, description='Any additional dataset specific properties.')
     modified_date: datetime = Field(None, description='The modification date of the last edit.')
     system_version: conint(gt=1) = Field(None, description='The version of the metadata structure.')
+    heights: Union[List[float], List[int]] = Field(None, description='The heights from all available results in the dataset.')
     bands: List[conint(ge=0)] = None
     chunk_parameters: ChunkParams
 
