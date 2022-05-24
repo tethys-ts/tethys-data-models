@@ -42,6 +42,7 @@ class AggregationStat(str, Enum):
     max = 'max'
     median = 'median'
     mean = 'mean'
+    sum = 'sum'
 
 
 class Limit(BaseModel):
@@ -52,7 +53,7 @@ class Limit(BaseModel):
     period: Period
     units: Units
     limit_boundary: LimitBoundary
-    aggregation_stat: Optional[AggregationStat]
+    aggregation_stat: Optional[AggregationStat] = Field(None, description='The aggregation statistic describes what statistic should be applied on the source data to be assessed against the limit.')
 
 
 class ConditionType(str, Enum):
