@@ -153,6 +153,7 @@ class Permit(BaseModel):
 
     """
     permit_id: str
+    parent_permit_id: Optional[str]
     status: Status
     status_changed_date: Optional[date]
     commencement_date: date
