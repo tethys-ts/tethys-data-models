@@ -58,6 +58,7 @@ class Limit(BaseModel):
 
 class ConditionType(str, Enum):
     abstraction_limit = 'abstraction limit'
+    # streamflow_limit = 'streamflow limit'
 
 
 class Condition(BaseModel):
@@ -115,7 +116,7 @@ class Station(base.Station):
     """
     Contains the station data.
     """
-    properties: AquiferProp
+    properties: Optional[AquiferProp]
 
 
 class Feature(str, Enum):
