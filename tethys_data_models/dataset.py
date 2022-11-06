@@ -119,6 +119,7 @@ class ResultChunk(BaseModel):
     n_times: conint(ge=0) = Field(None, description='The length of the time dimension array.')
     from_date: datetime
     to_date: datetime
+    modified_date: datetime = Field(..., description='The modification date of the last edit.')
 
     class Config:
         json_loads = orjson.loads
