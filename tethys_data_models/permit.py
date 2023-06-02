@@ -25,11 +25,13 @@ class Period(str, Enum):
     weeks = 'W'
     months = 'M'
     years = 'Y'
+    multi_years = 'multiple years'
 
 
 class Units(str, Enum):
     liters = 'l'
     cubic_meters = 'm3'
+    mg_l = 'mg/l'
 
 
 class LimitBoundary(str, Enum):
@@ -43,17 +45,22 @@ class AggregationStat(str, Enum):
     median = 'median'
     mean = 'mean'
     sum = 'sum'
+    perc_95 = '95th percentile'
+    exceeded_8_perc = 'Exceeded no more than 8% of samples'
+    exceeded_17_perc = 'Exceeded no more than 17% of samples'
 
 
 class Limit(BaseModel):
     """
 
     """
+    name: Optional[str]
     value: Union[int, float]
     period: Period
     units: Units
     limit_boundary: LimitBoundary
     aggregation_stat: Optional[AggregationStat] = Field(None, description='The aggregation statistic describes what statistic should be applied on the source data to be assessed against the limit.')
+    notes: Optional[str]
 
 
 class ConditionType(str, Enum):
@@ -120,19 +127,21 @@ class Station(base.Station):
 
 
 class Feature(str, Enum):
-    surface_water = 'surface water'
+    waterways = 'waterways'
     groundwater = 'groundwater'
+    still_waters = 'still waters'
 
 
 class Activity(BaseModel):
     """
 
     """
-    activity_type: ActivityType
-    feature: Feature
+    activity_type: List[ActivityType]
+    feature: List[Feature]
     primary_purpose: Optional[str]
     station: List[Station]
     condition: List[Condition]
+    notes: Optional[str]
 
 
 class Status(str, Enum):
