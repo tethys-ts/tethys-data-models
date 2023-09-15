@@ -234,6 +234,7 @@ class Dataset(DatasetBase):
     heights: Union[List[float], List[int]] = Field(None, description='The heights from all available results in the dataset.')
     bands: List[conint(ge=0)] = None
     chunk_parameters: ChunkParams
+    crs: str = Field(None, description='The geographic coordinate system as a proj4 string.')
 
     class Config:
         json_loads = orjson.loads

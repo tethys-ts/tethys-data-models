@@ -50,6 +50,15 @@ key_patterns = {2: {
                     # 'latest_results_chunks': 'tethys/v4/{dataset_id}.results_chunks.json.zst',
                     'diagnostics': 'tethys/v4/diagnostics/{run_id}.json.zst',
                     'interim_results': 'tethys/v4/interim/{run_id}/{dataset_id}/{station_id}.{start_date}.h5'
+                    },
+                5: {
+                    'results': 'tethys/v5/{dataset_id}/{version_date}/{station_id}/{chunk_id}.results.h5',
+                    'datasets': 'tethys/v5.datasets.json.zst',
+                    'stations': 'tethys/v5/{dataset_id}/{version_date}.stations.json.zst',
+                    'dataset': 'tethys/v5/{dataset_id}.dataset.json.zst',
+                    'versions': 'tethys/v5/{dataset_id}.versions.json.zst',
+                    'results_chunks': 'tethys/v5/{dataset_id}/{version_date}.results_chunks.json.zst',
+                    'diagnostics': 'tethys/v5/diagnostics/{run_id}.json.zst',
                     }
                 }
 
