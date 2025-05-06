@@ -136,8 +136,8 @@ class Activity(BaseModel):
     """
 
     """
-    activity_type: List[ActivityType]
-    feature: List[Feature]
+    activity_type: ActivityType
+    feature: Feature
     primary_purpose: Optional[str]
     station: List[Station]
     condition: List[Condition]
